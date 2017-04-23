@@ -73,7 +73,12 @@ function registerAuth(req, res) {
 }
 
 function githubAuth(req, res) {
-    console.log('bok: req = ' + req)
+    console.log('bok: req.body = ' + req.body)
+    console.log('bok: config.auth.github.client_id = ' + config.auth.github.clientId)
+    console.log('bok: config.auth.github.client_secret= ' + config.auth.github.clientSecret)
+    console.log('bok: code = ' + req.body.code)
+    console.log('bok: redirect_uri = ' + req.body.redirect_uri)
+    console.log('bok: state = ' + req.body.state)
   Axios.post('https://github.com/login/oauth/access_token', {
     client_id: config.auth.github.clientId,
     client_secret: config.auth.github.clientSecret,
