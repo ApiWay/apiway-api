@@ -1,0 +1,28 @@
+{
+  "auth": {
+    "google": {
+      "clientId": "",
+      "clientSecret": ""
+    },
+    "facebook": {
+      "clientId": "",
+      "clientSecret": ""
+    },
+    "github": {
+      "clientId": "40b12bd8b129cc8803e3",
+      "clientSecret": "8242e2a5c9e5ac5ef00aa23cbf6daaea5998645e"
+    },
+    "twitter": {
+      "clientId": "",
+      "clientSecret": ""
+    },
+    "instagram": {
+      "clientId": "",
+      "clientSecret": ""
+    },
+    "bitbucket": {
+      "clientId": "",
+      "clientSecret": ""
+    }
+  }
+}
