@@ -3,7 +3,7 @@ var router = express.Router();
 var bodyParser = require('body-parser')
 var Axios = require('axios')
 var Request = require('request')
-var config = require('./config.json')
+var config = require('../config.json')
 var OAuth = require('oauth')
 var timestamp = require('unix-timestamp')
 var oauthSignature = require('oauth-signature')
@@ -98,6 +98,7 @@ function githubAuth(req, res) {
       res.status(500).json({ error: responseJson.error })
     } else {
       res.json(responseJson)
+      console.log("bok : " + responseJson);
     }
   }).catch(function (err) {
     res.status(500).json(err)
