@@ -52,8 +52,8 @@ function connectDB () {
 
 function getUser (data) {
   return new Promise((resolve, reject) => {
-      User.find(
-        {"userId": data.userId},
+      User.findOne(
+        {"_id": data.userId},
         function(err, user) {
           if (err) {
             console.error(err)
@@ -70,13 +70,14 @@ function createUser (data) {
   return new Promise((resolve, reject) => {
     var userId = data.login + '@' + data.oauthProvider
     var query = User.findOneAndUpdate(
-      {"login": data.login},
+      {"login": data.login,
+        "oauthProvider": data.oauthProvider
+      },
       {$set:{
         'login': data.login,
         'avatarUrl': data.avatarUrl,
         'email': data.email,
-        'oauthProvider': data.oauthProvider,
-        'userId': data.login + '@' + data.oauthProvider
+        'oauthProvider': data.oauthProvider
         },
       },
       {upsert: true, new: true},
@@ -85,8 +86,8 @@ function createUser (data) {
           console.error(err)
           reject(err)
         }
-        console.log('createUser done: ' + user.userId)
-        resolve(user.userId)
+        console.log('createUser done: ' + user._id)
+        resolve(user._id)
       }
     )
   })

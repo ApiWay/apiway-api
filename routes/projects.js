@@ -52,9 +52,8 @@ function connectDB () {
 
 function getProject (data) {
   return new Promise((resolve, reject) => {
-    console.log(data)
-      Project.find(
-        {"_id": data.id},
+      Project.findOne(
+        {"_id": data.projectId},
         function(err, project) {
           if (err) {
             console.error(err)
@@ -87,7 +86,7 @@ function createProject (data) {
           console.error(err)
           reject(err)
         }
-        console.log('createProject done: ' + project)
+        console.log('createProject done: ' + project._id)
         resolve(project._id)
       }
     )
