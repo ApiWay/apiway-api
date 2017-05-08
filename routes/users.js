@@ -15,10 +15,31 @@ var User = require('../models/user');
 
 router.post('/', function(req, res){
   // console.log(req)
-  connectDB().then(
-    createUser(req.body)
-  ).then ( () => {
-    response.responseStatus = RESP.SUCCESS
+    connectDB()
+    .then( data => createUser(req.body, data))
+    .then( (id) => {
+      response.responseMessage = RESP.SUCCESS
+      response.data = {
+        "userId": id
+      }
+      res.json(response)
+    }).catch( function (error) {
+      console.error(error)
+      response.responseStatus = RESP.FAIL;
+      response.responseMessage = error;
+      res.json(response)
+    })
+});
+
+router.get('/', function(req, res){
+  console.log(req)
+  connectDB()
+  .then( data => getUser(req.query, data))
+  .then( (id) => {
+    response.responseMessage = RESP.SUCCESS
+    response.data = {
+      "userId": id
+    }
     res.json(response)
   }).catch( function (error) {
     console.error(error)
@@ -27,7 +48,6 @@ router.post('/', function(req, res){
     res.json(response)
   })
 });
-
 
 function connectDB () {
   return new Promise((resolve, reject) => {
@@ -39,15 +59,33 @@ function connectDB () {
   })
 }
 
+function getUser (data) {
+  return new Promise((resolve, reject) => {
+      User.find(
+        {"userId": data.userId},
+        function(err, user) {
+          if (err) {
+            console.error(err)
+            reject(err)
+          }
+          console.log('createUser done: ' + user)
+          resolve(user)
+        }
+      )
+    })
+}
+
 function createUser (data) {
   return new Promise((resolve, reject) => {
-    User.findOneAndUpdate(
+    var userId = data.login + '@' + data.oauthProvider
+    var query = User.findOneAndUpdate(
       {"login": data.login},
       {$set:{
         'login': data.login,
         'avatarUrl': data.avatarUrl,
         'email': data.email,
-        'oauthProvider': data.oauthProvider
+        'oauthProvider': data.oauthProvider,
+        'userId': data.login + '@' + data.oauthProvider
         },
       },
       {upsert: true, new: true},
@@ -56,8 +94,8 @@ function createUser (data) {
           console.error(err)
           reject(err)
         }
-        console.log('createUser done')
-        resolve()
+        console.log('createUser done: ' + user.userId)
+        resolve(user.userId)
       }
     )
   })
