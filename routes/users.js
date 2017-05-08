@@ -31,6 +31,23 @@ router.post('/', function(req, res){
     })
 });
 
+router.get('/', function(req, res){
+  console.log(req)
+  connectDB()
+  .then( data => getUser(req.query, data))
+  .then( (id) => {
+    response.responseMessage = RESP.SUCCESS
+    response.data = {
+      "userId": id
+    }
+    res.json(response)
+  }).catch( function (error) {
+    console.error(error)
+    response.responseStatus = RESP.FAIL;
+    response.responseMessage = error;
+    res.json(response)
+  })
+});
 
 function connectDB () {
   return new Promise((resolve, reject) => {
@@ -40,6 +57,22 @@ function connectDB () {
       reject(error)
     })
   })
+}
+
+function getUser (data) {
+  return new Promise((resolve, reject) => {
+      User.find(
+        {"userId": data.userId},
+        function(err, user) {
+          if (err) {
+            console.error(err)
+            reject(err)
+          }
+          console.log('createUser done: ' + user)
+          resolve(user)
+        }
+      )
+    })
 }
 
 function createUser (data) {
