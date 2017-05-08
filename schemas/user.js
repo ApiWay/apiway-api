@@ -6,6 +6,7 @@ var userSchema = new Schema({
     avatarUrl: String,
     email: String,
     oauthProvider: String,
+    userId: String
 });
 
 module.exports = userSchema;

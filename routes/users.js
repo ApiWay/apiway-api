@@ -15,17 +15,20 @@ var User = require('../models/user');
 
 router.post('/', function(req, res){
   // console.log(req)
-  connectDB().then(
-    createUser(req.body)
-  ).then ( () => {
-    response.responseStatus = RESP.SUCCESS
-    res.json(response)
-  }).catch( function (error) {
-    console.error(error)
-    response.responseStatus = RESP.FAIL;
-    response.responseMessage = error;
-    res.json(response)
-  })
+    connectDB()
+    .then( data => createUser(req.body, data))
+    .then( (id) => {
+      response.responseMessage = RESP.SUCCESS
+      response.data = {
+        "userId": id
+      }
+      res.json(response)
+    }).catch( function (error) {
+      console.error(error)
+      response.responseStatus = RESP.FAIL;
+      response.responseMessage = error;
+      res.json(response)
+    })
 });
 
 
@@ -41,13 +44,15 @@ function connectDB () {
 
 function createUser (data) {
   return new Promise((resolve, reject) => {
-    User.findOneAndUpdate(
+    var userId = data.login + '@' + data.oauthProvider
+    var query = User.findOneAndUpdate(
       {"login": data.login},
       {$set:{
         'login': data.login,
         'avatarUrl': data.avatarUrl,
         'email': data.email,
-        'oauthProvider': data.oauthProvider
+        'oauthProvider': data.oauthProvider,
+        'userId': data.login + '@' + data.oauthProvider
         },
       },
       {upsert: true, new: true},
@@ -56,8 +61,8 @@ function createUser (data) {
           console.error(err)
           reject(err)
         }
-        console.log('createUser done')
-        resolve()
+        console.log('createUser done: ' + user.userId)
+        resolve(user.userId)
       }
     )
   })
