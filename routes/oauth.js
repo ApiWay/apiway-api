@@ -3,13 +3,13 @@ var router = express.Router();
 var bodyParser = require('body-parser')
 var Axios = require('axios')
 var Request = require('request')
-var config = require('./config.json')
+var config = require('../config.json')
 var OAuth = require('oauth')
 var timestamp = require('unix-timestamp')
 var oauthSignature = require('oauth-signature')
 
 
-router.get('/:provider', function(req, res){
+router.post('/:provider', function(req, res){
     console.log(req.params);
   switch(req.params.provider) {
     case 'github':
@@ -73,7 +73,16 @@ function registerAuth(req, res) {
 }
 
 function githubAuth(req, res) {
-    console.log('bok: req = ' + req)
+    console.log('bok: req.body = ' + req.body)
+    console.log('bok: req.query = ' + req.query)
+    console.log('bok: req.query.code = ' + req.query.code)
+    console.log('bok: config.auth.github.client_id = ' + config.auth.github.clientId)
+    console.log('bok: config.auth.github.client_secret= ' + config.auth.github.clientSecret)
+    console.log('bok: code = ' + req.body.code)
+    console.log('bok: redirect_uri = ' + req.body.redirect_uri)
+    console.log('bok: redirect_uri = ' + req.query.redirect_uri)
+    console.log('bok: req.body.state = ' + req.body.state)
+    console.log('bok: req.query.state = ' + req.query.state)
   Axios.post('https://github.com/login/oauth/access_token', {
     client_id: config.auth.github.clientId,
     client_secret: config.auth.github.clientSecret,
@@ -85,9 +94,11 @@ function githubAuth(req, res) {
     var responseJson = parseQueryString(response.data)
     if (responseJson.error) {
         console.log("bok : " + responseJson.error);
+        console.log("bok : " + responseJson.error_description);
       res.status(500).json({ error: responseJson.error })
     } else {
       res.json(responseJson)
+      console.log("bok : " + responseJson);
     }
   }).catch(function (err) {
     res.status(500).json(err)

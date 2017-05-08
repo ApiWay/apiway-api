@@ -10,8 +10,6 @@ RUN apk add --update nodejs bash git
 
 COPY . /usr/src/app
 
-WORKDIR /usr/src/app/server
-
 EXPOSE 8080
 
 CMD [ "npm", "start" ]
