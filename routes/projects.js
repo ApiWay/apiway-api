@@ -27,10 +27,28 @@ router.post('/', function(req, res){
 router.get('/', function(req, res){
   console.log(req.query)
   connectDB()
-  .then( data => getProject(req.query, data))
+  .then( data => getProjectByProjectId(req.query, data))
   .then( (project) => {
     response.responseMessage = RESP.SUCCESS
     response.data = project
+    res.json(response)
+  }).catch( function (error) {
+    console.error(error)
+    response.responseStatus = RESP.FAIL;
+    response.responseMessage = error;
+    res.json(response)
+  })
+});
+
+router.get('/users', function(req, res){
+  console.log(req.query)
+  connectDB()
+    .then( data => getProjectByUserId(req.query, data))
+  .then( (projects) => {
+    response.responseMessage = RESP.SUCCESS
+    response.data = {
+      projects: projects
+    }
     res.json(response)
   }).catch( function (error) {
     console.error(error)
@@ -50,7 +68,7 @@ function connectDB () {
   })
 }
 
-function getProject (data) {
+function getProjectByProjectId (data) {
   return new Promise((resolve, reject) => {
       Project.findOne(
         {"_id": data.projectId},
@@ -64,6 +82,22 @@ function getProject (data) {
         }
       )
     })
+}
+
+function getProjectByUserId (data) {
+  return new Promise((resolve, reject) => {
+      Project.find(
+      {"owner": data.userId},
+      function(err, project) {
+        if (err) {
+          console.error(err)
+          reject(err)
+        }
+        console.log(project)
+        resolve(project)
+      }
+    )
+})
 }
 
 function createProject (data) {
