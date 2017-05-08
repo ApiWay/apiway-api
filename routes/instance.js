@@ -27,12 +27,12 @@ router.post('/', function(req, res){
 });
 
 router.get('/', function(req, res){
-  console.log(req.query)
+  // console.log(req.query)
   connectDB()
-  .then( data => getProjectByProjectId(req.query, data))
-  .then( (project) => {
+  .then( data => getInstanceByInstanceId(req.query, data))
+  .then( (instance) => {
     response.responseMessage = RESP.SUCCESS
-    response.data = project
+    response.data = instance
     res.json(response)
   }).catch( function (error) {
     console.error(error)
@@ -43,13 +43,13 @@ router.get('/', function(req, res){
 });
 
 router.get('/users', function(req, res){
-  console.log(req.query)
+  // console.log(req.query)
   connectDB()
-  .then( data => getProjectByUserId(req.query, data))
-  .then( (projects) => {
+  .then( data => getInstancesByUserId(req.query, data))
+  .then( (instances) => {
     response.responseMessage = RESP.SUCCESS
     response.data = {
-      projects: projects
+      projects: instances
     }
     res.json(response)
   }).catch( function (error) {
@@ -58,6 +58,24 @@ router.get('/users', function(req, res){
     response.responseMessage = error;
     res.json(response)
   })
+});
+
+router.get('/projects', function(req, res){
+  // console.log(req.query)
+  connectDB()
+  .then( data => getInstancesByProjectId(req.query, data))
+  .then( (instances) => {
+    response.responseMessage = RESP.SUCCESS
+  response.data = {
+    projects: instances
+  }
+  res.json(response)
+  }).catch( function (error) {
+      console.error(error)
+      response.responseStatus = RESP.FAIL;
+      response.responseMessage = error;
+      res.json(response)
+    })
 });
 
 function connectDB () {
@@ -70,20 +88,35 @@ function connectDB () {
   })
 }
 
-function getProjectByProjectId (data) {
+function getInstanceByInstanceId(data) {
   return new Promise((resolve, reject) => {
-      Project.findOne(
-        {"_id": data.projectId},
-        function(err, project) {
+      Instance.findOne(
+        {"_id": data.instanceId},
+        function(err, instance) {
           if (err) {
             console.error(err)
             reject(err)
           }
-          // console.log(project)
-          resolve(project)
+          resolve(instance)
         }
       )
     })
+}
+
+function getProjectByProjectId (data) {
+  return new Promise((resolve, reject) => {
+      Project.findOne(
+      {"_id": data.projectId},
+      function(err, project) {
+        if (err) {
+          console.error(err)
+          reject(err)
+        }
+        // console.log(project)
+        resolve(project)
+      }
+    )
+})
 }
 
 function getProjectByUserId (data) {
@@ -95,8 +128,40 @@ function getProjectByUserId (data) {
           console.error(err)
           reject(err)
         }
-        console.log(project)
+        // console.log(project)
         resolve(project)
+      }
+    )
+})
+}
+
+function getInstancesByUserId (data) {
+  return new Promise((resolve, reject) => {
+      Instance.find(
+      {"owner": data.userId},
+      function(err, instances) {
+        if (err) {
+          console.error(err)
+          reject(err)
+        }
+        // console.log(instances)
+        resolve(instances)
+      }
+    )
+})
+}
+
+function getInstancesByProjectId (data) {
+  return new Promise((resolve, reject) => {
+      Instance.find(
+      {"project.projectId": data.projectId},
+      function(err, instances) {
+        if (err) {
+          console.error(err)
+          reject(err)
+        }
+        // console.log(instances)
+        resolve(instances)
       }
     )
 })
@@ -104,12 +169,12 @@ function getProjectByUserId (data) {
 
 function createInstance(data) {
   return new Promise((resolve, reject) => {
-    // console.log(data)
+    console.log(data)
     var d = {
       project: {
         name: data.name,
         fullName: data.fullName,
-        projectId: data.projectId,
+        projectId: data._id,
         url: data.url,
         provider: data.provider
       },
