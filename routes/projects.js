@@ -4,16 +4,16 @@ var db = require('../utils/db')
 var Response = require('../utils/response');
 var RESP = require('../utils/response_values');
 var response = new Response();
-var User = require('../models/user');
+var Project = require('../models/project');
 
 router.post('/', function(req, res){
   // console.log(req)
     connectDB()
-    .then( data => createUser(req.body, data))
+    .then( data => createProject(req.body, data))
     .then( (id) => {
       response.responseMessage = RESP.SUCCESS
       response.data = {
-        "userId": id
+        "projectId": id
       }
       res.json(response)
     }).catch( function (error) {
@@ -25,12 +25,12 @@ router.post('/', function(req, res){
 });
 
 router.get('/', function(req, res){
-  console.log(req)
+  console.log(req.query)
   connectDB()
-  .then( data => getUser(req.query, data))
-  .then( (user) => {
+  .then( data => getProject(req.query, data))
+  .then( (project) => {
     response.responseMessage = RESP.SUCCESS
-    response.data = user
+    response.data = project
     res.json(response)
   }).catch( function (error) {
     console.error(error)
@@ -50,44 +50,44 @@ function connectDB () {
   })
 }
 
-function getUser (data) {
+function getProject (data) {
   return new Promise((resolve, reject) => {
-      User.findOne(
-        {"_id": data.userId},
-        function(err, user) {
+      Project.findOne(
+        {"_id": data.projectId},
+        function(err, project) {
           if (err) {
             console.error(err)
             reject(err)
           }
-          console.log('createUser done: ' + user)
-          resolve(user)
+          console.log(project)
+          resolve(project)
         }
       )
     })
 }
 
-function createUser (data) {
+function createProject (data) {
   return new Promise((resolve, reject) => {
-    var userId = data.login + '@' + data.oauthProvider
-    var query = User.findOneAndUpdate(
-      {"login": data.login,
-        "oauthProvider": data.oauthProvider
+    Project.findOneAndUpdate(
+      {"fullName": data.fullName,
+        "provider": data.provider
       },
       {$set:{
-        'login': data.login,
-        'avatarUrl': data.avatarUrl,
-        'email': data.email,
-        'oauthProvider': data.oauthProvider
+        'name': data.name,
+        'fullName': data.fullName,
+        'owner': data.owner,
+        'url': data.url,
+        'provider': data.provider
         },
       },
       {upsert: true, new: true},
-      function(err, user) {
+      function(err, project) {
         if (err) {
           console.error(err)
           reject(err)
         }
-        console.log('createUser done: ' + user._id)
-        resolve(user._id)
+        console.log('createProject done: ' + project._id)
+        resolve(project._id)
       }
     )
   })
