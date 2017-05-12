@@ -26,10 +26,10 @@ router.post('/', function(req, res){
     })
 });
 
-router.get('/', function(req, res){
+router.get('/:instanceId', function(req, res){
   // console.log(req.query)
   connectDB()
-  .then( data => getInstanceByInstanceId(req.query, data))
+  .then( data => getInstanceByInstanceId(req.params, data))
   .then( (instance) => {
     response.responseMessage = RESP.SUCCESS
     response.data = instance
@@ -42,14 +42,14 @@ router.get('/', function(req, res){
   })
 });
 
-router.get('/users', function(req, res){
+router.get('/users/:userId', function(req, res){
   // console.log(req.query)
   connectDB()
-  .then( data => getInstancesByUserId(req.query, data))
+  .then( data => getInstancesByUserId(req.params, data))
   .then( (instances) => {
     response.responseMessage = RESP.SUCCESS
     response.data = {
-      projects: instances
+      instances: instances
     }
     res.json(response)
   }).catch( function (error) {
@@ -60,14 +60,14 @@ router.get('/users', function(req, res){
   })
 });
 
-router.get('/projects', function(req, res){
+router.get('/projects/:projectId', function(req, res){
   // console.log(req.query)
   connectDB()
-  .then( data => getInstancesByProjectId(req.query, data))
+  .then( data => getInstancesByProjectId(req.params, data))
   .then( (instances) => {
     response.responseMessage = RESP.SUCCESS
   response.data = {
-    projects: instances
+    instances: instances
   }
   res.json(response)
   }).catch( function (error) {
@@ -107,22 +107,6 @@ function getProjectByProjectId (data) {
   return new Promise((resolve, reject) => {
       Project.findOne(
       {"_id": data.projectId},
-      function(err, project) {
-        if (err) {
-          console.error(err)
-          reject(err)
-        }
-        // console.log(project)
-        resolve(project)
-      }
-    )
-})
-}
-
-function getProjectByUserId (data) {
-  return new Promise((resolve, reject) => {
-      Project.find(
-      {"owner": data.userId},
       function(err, project) {
         if (err) {
           console.error(err)
