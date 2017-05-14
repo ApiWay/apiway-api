@@ -5,7 +5,8 @@ var projectSchema = new Schema({
     name: String,
     fullName: String,
     owner: String, //User.userId
-    url: String,
+    html_url: String,
+    git_url: String,
     provider: String,
     projectId: String
 });
