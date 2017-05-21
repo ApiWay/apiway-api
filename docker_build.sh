@@ -12,10 +12,11 @@ chmod +x ecr_login.sh
 docker build -t $REPOSITORY:$TAG .
 docker tag $REPOSITORY:$TAG $AWS_CONTAINER_REGISTRY/$REPOSITORY:$TAG
 docker push $AWS_CONTAINER_REGISTRY/$REPOSITORY:$TAG
-kubectl rolling-update $REPOSITORY --image $AWS_CONTAINER_REGISTRY/$REPOSITORY:$TAG
+kubectl rolling-update $REPOSITORY --image-pull-policy=Always --image $AWS_CONTAINER_REGISTRY/$REPOSITORY:$TAG
 
 #kubectl rolling-update $REPOSITORY --rollback=true
 if [ $? -ne 0 ]; then
+    echo "rolling-update --rollback"
     kubectl rolling-update $REPOSITORY --rollback=true
 fi
 
