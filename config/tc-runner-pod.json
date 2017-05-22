@@ -4,14 +4,18 @@
   "metadata": {
     "name": "",
     "labels": {
-      "purpose": "TC Running"
+      "purpose": "TC-Running"
     }
   },
   "spec": {
+    "restartPolicy": "Never",
     "containers": [
       {
         "name": "tower-tc-runner",
-        "image": "539277938309.dkr.ecr.us-west-2.amazonaws.com/tower-tc-runner:latest"
+        "image": "539277938309.dkr.ecr.us-west-2.amazonaws.com/tower-tc-runner:latest",
+        "env": {
+          "instanceId": ""
+        }
       }
     ]
   }
