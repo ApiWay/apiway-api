@@ -15,6 +15,7 @@ router.post('/', function(req, res){
       response.data = {
         "projectId": id
       }
+      console.log(response)
       res.json(response)
     }).catch( function (error) {
       console.error(error)
@@ -25,6 +26,7 @@ router.post('/', function(req, res){
 });
 
 router.get('/:projectId', function(req, res){
+  console.log(req.params.projectId)
   connectDB()
   .then( data => getProjectByProjectId(req.params, data))
   .then( (project) => {
@@ -104,14 +106,15 @@ function getProjectsByUserId (data) {
 function createProject (data) {
   return new Promise((resolve, reject) => {
     Project.findOneAndUpdate(
-      {"fullName": data.fullName,
+      {"full_name": data.full_name,
         "provider": data.provider
       },
       {$set:{
         'name': data.name,
-        'fullName': data.fullName,
+        'full_name': data.fullName,
         'owner': data.owner,
-        'url': data.url,
+        'html_url': data.url,
+        'git_url': data.git_url,
         'provider': data.provider
         },
       },
