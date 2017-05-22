@@ -111,7 +111,7 @@ function createProject (data) {
       },
       {$set:{
         'name': data.name,
-        'full_name': data.fullName,
+        'full_name': data.full_name,
         'owner': data.owner,
         'html_url': data.url,
         'git_url': data.git_url,
