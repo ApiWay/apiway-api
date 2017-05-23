@@ -9,14 +9,13 @@
   },
   "spec": {
     "restartPolicy": "Never",
-    "containers": [
-      {
-        "name": "tower-tc-runner",
-        "image": "539277938309.dkr.ecr.us-west-2.amazonaws.com/tower-tc-runner:latest",
-        "env": {
-          "instanceId": ""
-        }
-      }
-    ]
+    "containers": [{
+      "name": "tower-tc-runner",
+      "image": "539277938309.dkr.ecr.us-west-2.amazonaws.com/tower-tc-runner:latest",
+      "env": [{
+        "name": "instanceId",
+        "value": ""
+      }]
+    }]
   }
 }

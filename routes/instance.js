@@ -173,9 +173,10 @@ function createInstance(data) {
     var d = {
       project: {
         name: data.name,
-        fullName: data.fullName,
+        full_name: data.full_name,
         projectId: data._id,
-        url: data.url,
+        home_url: data.home_url,
+        git_url: data.git_url,
         provider: data.provider
       },
       owner: data.owner,
@@ -189,7 +190,7 @@ function createInstance(data) {
         console.error(err)
         reject(err)
       }
-      // console.log('createInstance done: ' + instance)
+      console.log('createInstance done: ' + instance)
       resolve(instance)
     })
   })
@@ -197,8 +198,8 @@ function createInstance(data) {
 
 function runDocker(data) {
   return new Promise((resolve, reject) => {
+    console.log('runDocker: data = ' + data)
     let configFile = tcRunnerConfig.metadata.name + '.json'
-    tcRunnerConfig.spec.containers[0].env.instanceId = data._id
     let cmd = `kubectl create -f ${configFile} && rm -f ${configFile}`
     // let cmd = `kubectl create -f ${configFile}`
     // let cmd = 'ls -al'
@@ -218,6 +219,7 @@ function setupDocker(data) {
   return new Promise((resolve, reject) => {
     let id = data._id
     tcRunnerConfig.metadata.name = TC_RUNNER_PREFIX + id
+    tcRunnerConfig.spec.containers[0].env[0].value = id
     let configFile = tcRunnerConfig.metadata.name + '.json'
     let configString = JSON.stringify(tcRunnerConfig)
     fs.writeFileSync(configFile, configString, 'utf8')
