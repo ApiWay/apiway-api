@@ -24,10 +24,9 @@ router.post('/', function(req, res){
     })
 });
 
-router.get('/', function(req, res){
-  console.log(req)
+router.get('/:userId', function(req, res){
   connectDB()
-  .then( data => getUser(req.query, data))
+  .then( data => getUser(req.params, data))
   .then( (user) => {
     response.responseMessage = RESP.SUCCESS
     response.data = user

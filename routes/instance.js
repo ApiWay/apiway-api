@@ -1,35 +1,49 @@
 var express = require('express')
 var router = express.Router();
+var async = require('async')
+var spawn = require('child_process').spawn
+var fs = require('fs');
 var db = require('../utils/db')
 var Response = require('../utils/response');
 var RESP = require('../utils/response_values');
 var response = new Response();
 var Instance = require('../models/instance');
 var Project = require('../models/project');
+var tcRunnerConfig = require('../config/tc-runner-pod.json')
+var TC_RUNNER_PREFIX = 'tc-runner-'
 
 router.post('/', function(req, res){
-  // console.log(req)
+  console.log('instance / :POST started')
+  if (req.body) {
     connectDB()
     .then( data => getProjectByProjectId(req.body, data))
-    .then( data => createInstance(data, data))
-    .then( (id) => {
-      response.responseMessage = RESP.SUCCESS
+    .then( data => createInstance(data))
+    .then( data => setupDocker(data))
+    .then( data => runDocker(data))
+    .then( (data) => {
+      console.log(data)
+      console.log(JSON.stringify(data))
+      response.responseStatus = RESP.SUCCESS
+      response.responseMessage = "OK"
       response.data = {
-        "instanceId": id
+        "instanceId": data._id
       }
+      console.log(JSON.stringify(response))
       res.json(response)
     }).catch( function (error) {
       console.error(error)
-      response.responseStatus = RESP.FAIL;
-      response.responseMessage = error;
+      response.responseStatus = RESP.FAIL
+      response.responseMessage = error
+      response.data = null
       res.json(response)
     })
+  }
 });
 
-router.get('/', function(req, res){
+router.get('/:instanceId', function(req, res){
   // console.log(req.query)
   connectDB()
-  .then( data => getInstanceByInstanceId(req.query, data))
+  .then( data => getInstanceByInstanceId(req.params, data))
   .then( (instance) => {
     response.responseMessage = RESP.SUCCESS
     response.data = instance
@@ -42,14 +56,14 @@ router.get('/', function(req, res){
   })
 });
 
-router.get('/users', function(req, res){
+router.get('/users/:userId', function(req, res){
   // console.log(req.query)
   connectDB()
-  .then( data => getInstancesByUserId(req.query, data))
+  .then( data => getInstancesByUserId(req.params, data))
   .then( (instances) => {
     response.responseMessage = RESP.SUCCESS
     response.data = {
-      projects: instances
+      instances: instances
     }
     res.json(response)
   }).catch( function (error) {
@@ -60,15 +74,15 @@ router.get('/users', function(req, res){
   })
 });
 
-router.get('/projects', function(req, res){
+router.get('/projects/:projectId', function(req, res){
   // console.log(req.query)
   connectDB()
-  .then( data => getInstancesByProjectId(req.query, data))
+  .then( data => getInstancesByProjectId(req.params, data))
   .then( (instances) => {
     response.responseMessage = RESP.SUCCESS
-  response.data = {
-    projects: instances
-  }
+    response.data = {
+      instances: instances
+    }
   res.json(response)
   }).catch( function (error) {
       console.error(error)
@@ -90,20 +104,21 @@ function connectDB () {
 
 function getInstanceByInstanceId(data) {
   return new Promise((resolve, reject) => {
-      Instance.findOne(
-        {"_id": data.instanceId},
-        function(err, instance) {
-          if (err) {
-            console.error(err)
-            reject(err)
-          }
-          resolve(instance)
+    Instance.findOne(
+      {"_id": data.instanceId},
+      function(err, instance) {
+        if (err) {
+          console.error(err)
+          reject(err)
         }
-      )
-    })
+        resolve(instance)
+      }
+    )
+  })
 }
 
 function getProjectByProjectId (data) {
+  console.log('getProjectByProjectId:' + JSON.stringify(data))
   return new Promise((resolve, reject) => {
       Project.findOne(
       {"_id": data.projectId},
@@ -112,27 +127,12 @@ function getProjectByProjectId (data) {
           console.error(err)
           reject(err)
         }
-        // console.log(project)
+        console.log('getProjectByProjectId')
+        console.log(project)
         resolve(project)
       }
     )
-})
-}
-
-function getProjectByUserId (data) {
-  return new Promise((resolve, reject) => {
-      Project.find(
-      {"owner": data.userId},
-      function(err, project) {
-        if (err) {
-          console.error(err)
-          reject(err)
-        }
-        // console.log(project)
-        resolve(project)
-      }
-    )
-})
+  })
 }
 
 function getInstancesByUserId (data) {
@@ -148,7 +148,7 @@ function getInstancesByUserId (data) {
         resolve(instances)
       }
     )
-})
+  })
 }
 
 function getInstancesByProjectId (data) {
@@ -164,18 +164,19 @@ function getInstancesByProjectId (data) {
         resolve(instances)
       }
     )
-})
+  })
 }
 
 function createInstance(data) {
   return new Promise((resolve, reject) => {
-    console.log(data)
+    console.log('createInstance: ' + JSON.stringify(data))
     var d = {
       project: {
         name: data.name,
-        fullName: data.fullName,
+        full_name: data.full_name,
         projectId: data._id,
-        url: data.url,
+        home_url: data.home_url,
+        git_url: data.git_url,
         provider: data.provider
       },
       owner: data.owner,
@@ -189,11 +190,75 @@ function createInstance(data) {
         console.error(err)
         reject(err)
       }
-      console.log('createInstance done: ' + instance._id)
-      resolve(instance._id)
+      console.log('createInstance done: ' + instance)
+      resolve(instance)
     })
   })
 }
+
+function runDocker(data) {
+  return new Promise((resolve, reject) => {
+    console.log('runDocker: data = ' + data)
+    let configFile = tcRunnerConfig.metadata.name + '.json'
+    let cmd = `kubectl create -f ${configFile} && rm -f ${configFile}`
+    // let cmd = `kubectl create -f ${configFile}`
+    // let cmd = 'ls -al'
+    runInBash(cmd, (err) => {
+      if (err) {
+        console.log('runDocker error : ' + err)
+        reject(err)
+      } else {
+        console.log('runDocker done')
+        resolve(data)
+      }
+    })
+  })
+}
+
+function setupDocker(data) {
+  return new Promise((resolve, reject) => {
+    let id = data._id
+    tcRunnerConfig.metadata.name = TC_RUNNER_PREFIX + id
+    tcRunnerConfig.spec.containers[0].env[0].value = id
+    let configFile = tcRunnerConfig.metadata.name + '.json'
+    let configString = JSON.stringify(tcRunnerConfig)
+    fs.writeFileSync(configFile, configString, 'utf8')
+    // console.log(tcRunnerConfig)
+    // console.log('in setupDocker: resolve')
+    resolve(data)
+  })
+}
+
+function runInBash(cmd, cb) {
+  console.log("runInBash: " + cmd);
+  // console.log('bok--------1 ' + logCmd);
+  var proc = spawn('/bin/bash', ['-c', cmd ])
+  // proc.stdout.pipe(utils.lineStream(log.info))
+  // proc.stderr.pipe(utils.lineStream(log.error))
+  // proc.on('error', cb)
+  proc.on('error', function (err) {
+    console.log(err)
+    cb(err);
+  });
+  proc.stdout.on('data', function(data) {
+    console.log(data.toString());
+  });
+  proc.stderr.on('data', function(data) {
+    console.log(data.toString());
+  });
+
+  proc.on('close', function(code) {
+    var err
+    console.log("close: " + code);
+    if (code) {
+      err = new Error(`Command "${cmd}" failed with code ${code}`)
+      err.code = code
+      // err.logTail = log.getTail()
+    }
+    cb(code)
+  })
+}
+
 
 
 module.exports = router;

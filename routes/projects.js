@@ -15,6 +15,7 @@ router.post('/', function(req, res){
       response.data = {
         "projectId": id
       }
+      console.log(response)
       res.json(response)
     }).catch( function (error) {
       console.error(error)
@@ -24,13 +25,14 @@ router.post('/', function(req, res){
     })
 });
 
-router.get('/', function(req, res){
-  console.log(req.query)
+router.get('/:projectId', function(req, res){
+  console.log(req.params.projectId)
   connectDB()
-  .then( data => getProjectByProjectId(req.query, data))
+  .then( data => getProjectByProjectId(req.params, data))
   .then( (project) => {
     response.responseMessage = RESP.SUCCESS
     response.data = project
+    console.log(response)
     res.json(response)
   }).catch( function (error) {
     console.error(error)
@@ -40,10 +42,10 @@ router.get('/', function(req, res){
   })
 });
 
-router.get('/users', function(req, res){
-  console.log(req.query)
+router.get('/users/:userId', function(req, res){
+  console.log(req.params)
   connectDB()
-    .then( data => getProjectByUserId(req.query, data))
+    .then( data => getProjectsByUserId(req.params, data))
   .then( (projects) => {
     response.responseMessage = RESP.SUCCESS
     response.data = {
@@ -84,8 +86,9 @@ function getProjectByProjectId (data) {
     })
 }
 
-function getProjectByUserId (data) {
+function getProjectsByUserId (data) {
   return new Promise((resolve, reject) => {
+    console.log('.....' + JSON.stringify(data))
       Project.find(
       {"owner": data.userId},
       function(err, project) {
@@ -103,14 +106,15 @@ function getProjectByUserId (data) {
 function createProject (data) {
   return new Promise((resolve, reject) => {
     Project.findOneAndUpdate(
-      {"fullName": data.fullName,
+      {"full_name": data.full_name,
         "provider": data.provider
       },
       {$set:{
         'name': data.name,
-        'fullName': data.fullName,
+        'full_name': data.full_name,
         'owner': data.owner,
-        'url': data.url,
+        'html_url': data.url,
+        'git_url': data.git_url,
         'provider': data.provider
         },
       },

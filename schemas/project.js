@@ -3,9 +3,10 @@ var Schema = mongoose.Schema;
 
 var projectSchema = new Schema({
     name: String,
-    fullName: String,
+    full_name: String,
     owner: String, //User.userId
-    url: String,
+    html_url: String,
+    git_url: String,
     provider: String,
     projectId: String
 });

@@ -4,9 +4,10 @@ var Schema = mongoose.Schema;
 var instanceSchema = new Schema({
     project: {
       name: String,
-      fullName: String,
+      full_name: String,
       projectId: String, //Project._id
       url: String,
+      git_url: String,
       provider: String,
     },
     owner: String, //User._id

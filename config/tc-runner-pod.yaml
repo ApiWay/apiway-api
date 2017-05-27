@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: tc-runner
+  labels:
+    purpose: TC Running
+spec:
+  containers:
+  - name: tower-tc-runner
+    image: 539277938309.dkr.ecr.us-west-2.amazonaws.com/tower-tc-runner:0.0.9
