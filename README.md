@@ -6,7 +6,7 @@ RESTful API for apiway.io
 ## SDK
 #### Javascript
 It provides javascript library to use API for apiway.io
-* [npm: apiway.js](https://www.npmjs.com/package/apiway.js)
+* [![npm version](https://badge.fury.io/js/apiway.js.svg)](https://badge.fury.io/js/apiway.js)
 * [apiway-sdk-js](https://github.com/ApiWay/apiway-sdk-js)
 
 
