@@ -16,7 +16,7 @@ router.post('/', function(req, res){
   console.log('instance / :POST started')
   if (req.body) {
     connectDB()
-    .then( data => getProjectByProjectId(req.body, data))
+    .then( data => getProject(req.body, data))
     .then( data => createInstance(data))
     .then( data => setupDocker(data))
     .then( data => runDocker(data))
@@ -117,6 +117,14 @@ function getInstanceByInstanceId(data) {
   })
 }
 
+function getProject (data) {
+  if (data.projectId) {
+    return getProjectByProjectId(data)
+  } else if (data.full_name) {
+    return getProjectByProjectName(data)
+  }
+}
+
 function getProjectByProjectId (data) {
   console.log('getProjectByProjectId:' + JSON.stringify(data))
   return new Promise((resolve, reject) => {
@@ -128,6 +136,24 @@ function getProjectByProjectId (data) {
           reject(err)
         }
         console.log('getProjectByProjectId')
+        console.log(project)
+        resolve(project)
+      }
+    )
+  })
+}
+
+function getProjectByProjectName (data) {
+  console.log('getProjectByProjectName:' + JSON.stringify(data))
+  return new Promise((resolve, reject) => {
+      Project.findOne(
+      {"full_name": data.full_name},
+      function(err, project) {
+        if (err) {
+          console.error(err)
+          reject(err)
+        }
+        console.log('getProjectByProjectName')
         console.log(project)
         resolve(project)
       }
@@ -181,7 +207,7 @@ function createInstance(data) {
       },
       owner: data.owner,
       startTime: 0,
-      status: "Running",
+      status: "RUNNING",
       log: "xxx"
     }
     var instance = new Instance(d)
