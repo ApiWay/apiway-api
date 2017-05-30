@@ -6,15 +6,17 @@ var instanceSchema = new Schema({
       name: String,
       full_name: String,
       projectId: String, //Project._id
-      url: String,
+      home_url: String,
       git_url: String,
       provider: String,
     },
     owner: String, //User._id
     startTime: Number,
     endTime: Number,
+    locale: String,
     status: String,
-    log: String
+    logUrl: String,
+    resultUrl: String
 });
 
 module.exports = instanceSchema;
