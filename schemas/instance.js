@@ -16,7 +16,8 @@ var instanceSchema = new Schema({
     locale: String,
     status: String,
     logUrl: String,
-    resultUrl: String
+    reportJson: String,
+    reportHtml: String
 });
 
 module.exports = instanceSchema;

@@ -120,17 +120,11 @@ function connectDB () {
 
 function updateInstance (instanceId, data) {
   return new Promise((resolve, reject) => {
-      let objForUpdate = {}
-      if (data.status) objForUpdate.status = data.status
-      if (data.startTime) objForUpdate.startTime = data.startTime
-      if (data.endTime) objForUpdate.endTime = data.endTime
-      if (data.logUrl) objForUpdate.logUrl = data.logUrl
-      if (data.resultUrl) objForUpdate.resultUrl = data.resultUrl
 
       Instance.findOneAndUpdate(
       {"_id": instanceId
       },
-      {$set: objForUpdate
+      {$set: data
       },
       {upsert: true, new: true},
       function(err, instance) {
