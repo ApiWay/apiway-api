@@ -3,6 +3,10 @@
 # ApiWay: API
 RESTful API for apiway.io
 
+<a href="https://gitter.im/ApiWay/apiway-api?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"><img src="https://badges.gitter.im/Join Chat.svg" alt="Gitter chat" height="20"></a>
+
+---
+
 ## SDK
 #### Javascript
 It provides javascript library to use API for apiway.io
