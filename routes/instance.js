@@ -3,6 +3,7 @@ var router = express.Router();
 var async = require('async')
 var spawn = require('child_process').spawn
 var fs = require('fs');
+var moment = require('moment')
 var db = require('../utils/db')
 var Response = require('../utils/response');
 var RESP = require('../utils/response_values');
@@ -21,14 +22,14 @@ router.post('/', function(req, res){
     .then( data => setupDocker(data))
     .then( data => runDocker(data))
     .then( (data) => {
-      console.log(data)
-      console.log(JSON.stringify(data))
+      // console.log(data)
+      // console.log(JSON.stringify(data))
       response.responseStatus = RESP.SUCCESS
       response.responseMessage = "OK"
       response.data = {
         "instanceId": data._id
       }
-      console.log(JSON.stringify(response))
+      // console.log(JSON.stringify(response))
       res.json(response)
     }).catch( function (error) {
       console.error(error)
@@ -38,6 +39,21 @@ router.post('/', function(req, res){
       res.json(response)
     })
   }
+});
+
+router.put('/:instanceId', function(req, res){
+  connectDB()
+    .then( data => updateInstance(req.params.instanceId, req.body, data))
+    .then( (instance) => {
+      response.responseMessage = RESP.SUCCESS
+      response.data = instance
+      res.json(response)
+    }).catch( function (error) {
+        console.error(error)
+        response.responseStatus = RESP.FAIL;
+        response.responseMessage = error;
+        res.json(response)
+    })
 });
 
 router.get('/:instanceId', function(req, res){
@@ -102,6 +118,27 @@ function connectDB () {
   })
 }
 
+function updateInstance (instanceId, data) {
+  return new Promise((resolve, reject) => {
+
+      Instance.findOneAndUpdate(
+      {"_id": instanceId
+      },
+      {$set: data
+      },
+      {upsert: true, new: true},
+      function(err, instance) {
+        if (err) {
+          console.error(err)
+          reject(err)
+        }
+        // console.log('updateInstance done: ' + instance._id)
+        resolve(instance)
+      }
+    )
+  })
+}
+
 function getInstanceByInstanceId(data) {
   return new Promise((resolve, reject) => {
     Instance.findOne(
@@ -126,7 +163,7 @@ function getProject (data) {
 }
 
 function getProjectByProjectId (data) {
-  console.log('getProjectByProjectId:' + JSON.stringify(data))
+  // console.log('getProjectByProjectId:' + JSON.stringify(data))
   return new Promise((resolve, reject) => {
       Project.findOne(
       {"_id": data.projectId},
@@ -135,8 +172,8 @@ function getProjectByProjectId (data) {
           console.error(err)
           reject(err)
         }
-        console.log('getProjectByProjectId')
-        console.log(project)
+        // console.log('getProjectByProjectId')
+        // console.log(project)
         resolve(project)
       }
     )
@@ -144,7 +181,7 @@ function getProjectByProjectId (data) {
 }
 
 function getProjectByProjectName (data) {
-  console.log('getProjectByProjectName:' + JSON.stringify(data))
+  // console.log('getProjectByProjectName:' + JSON.stringify(data))
   return new Promise((resolve, reject) => {
       Project.findOne(
       {"full_name": data.full_name},
@@ -153,8 +190,8 @@ function getProjectByProjectName (data) {
           console.error(err)
           reject(err)
         }
-        console.log('getProjectByProjectName')
-        console.log(project)
+        // console.log('getProjectByProjectName')
+        // console.log(project)
         resolve(project)
       }
     )
@@ -195,7 +232,7 @@ function getInstancesByProjectId (data) {
 
 function createInstance(data) {
   return new Promise((resolve, reject) => {
-    console.log('createInstance: ' + JSON.stringify(data))
+    // console.log('createInstance: ' + JSON.stringify(data))
     var d = {
       project: {
         name: data.name,
@@ -206,9 +243,10 @@ function createInstance(data) {
         provider: data.provider
       },
       owner: data.owner,
-      startTime: 0,
+      startTime: moment().unix(),
+      locale: moment.locale(),
       status: "RUNNING",
-      log: "xxx"
+      logUrl: data.logUrl
     }
     var instance = new Instance(d)
     instance.save((err) => {
@@ -216,7 +254,7 @@ function createInstance(data) {
         console.error(err)
         reject(err)
       }
-      console.log('createInstance done: ' + instance)
+      // console.log('createInstance done: ' + instance)
       resolve(instance)
     })
   })
@@ -224,7 +262,7 @@ function createInstance(data) {
 
 function runDocker(data) {
   return new Promise((resolve, reject) => {
-    console.log('runDocker: data = ' + data)
+    // console.log('runDocker: data = ' + data)
     let configFile = tcRunnerConfig.metadata.name + '.json'
     let cmd = `kubectl create -f ${configFile} && rm -f ${configFile}`
     // let cmd = `kubectl create -f ${configFile}`
