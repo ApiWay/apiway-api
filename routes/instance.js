@@ -4,6 +4,8 @@ var async = require('async')
 var spawn = require('child_process').spawn
 var fs = require('fs');
 var moment = require('moment')
+var mqtt = require('mqtt')
+var bunyan = require('bunyan')
 var db = require('../utils/db')
 var Response = require('../utils/response');
 var RESP = require('../utils/response_values');
@@ -11,7 +13,11 @@ var response = new Response();
 var Instance = require('../models/instance');
 var Project = require('../models/project');
 var tcRunnerConfig = require('../config/tc-runner-pod.json')
+var config = require('../config.json')
 var TC_RUNNER_PREFIX = 'tc-runner-'
+
+let log = bunyan.createLogger({name:'apiway-api', module: 'instance'})
+var mqttClient
 
 router.post('/', function(req, res){
   console.log('instance / :POST started')
@@ -121,22 +127,44 @@ function connectDB () {
 function updateInstance (instanceId, data) {
   return new Promise((resolve, reject) => {
 
-      Instance.findOneAndUpdate(
-      {"_id": instanceId
-      },
-      {$set: data
-      },
-      {upsert: true, new: true},
-      function(err, instance) {
-        if (err) {
-          console.error(err)
-          reject(err)
-        }
-        // console.log('updateInstance done: ' + instance._id)
-        resolve(instance)
+    Instance.findOneAndUpdate(
+    {"_id": instanceId
+    },
+    {$set: data
+    },
+    {upsert: true, new: true},
+    function(err, instance) {
+      if (err) {
+        console.error(err)
+        reject(err)
       }
-    )
+      // console.log('updateInstance done: ' + instance._id)
+      resolve(instance)
+      sendNotification(instance.project.projectId)
+    })
   })
+}
+
+function sendNotification (projectId, data) {
+  Project.findOne(
+    {"_id": projectId},
+    function(err, project) {
+      if (err) {
+        console.error(err)
+        reject(err)
+      }
+      // console.log('getProjectByProjectId')
+      // console.log(project)
+      let url = `${config.mqtt.protocol}://${config.mqtt.host}`
+      mqttClient = mqtt.connect(url)
+      mqttClient.on('connect', onMqttConnect);
+    }
+  )
+}
+
+function onMqttConnect() {
+  log.info('mqtt: connected')
+  mqttClient.publish('apiway/smtp', 'test data')
 }
 
 function getInstanceByInstanceId(data) {
