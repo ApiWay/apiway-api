@@ -131,14 +131,7 @@ function createProject (data) {
         "provider": data.provider,
         "owner": data.owner
       },
-      {$set:{
-        'name': data.name,
-        'full_name': data.full_name,
-        'owner': data.owner,
-        'html_url': data.url,
-        'git_url': data.git_url,
-        'provider': data.provider
-        },
+      {$set:data
       },
       {upsert: true, new: true},
       function(err, project) {
