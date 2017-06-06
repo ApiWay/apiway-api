@@ -8,7 +8,8 @@ var projectSchema = new Schema({
     html_url: String,
     git_url: String,
     provider: String,
-    projectId: String
+    projectId: String,
+    subscriber: [String]
 });
 
 module.exports = projectSchema;

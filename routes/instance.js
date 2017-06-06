@@ -4,14 +4,20 @@ var async = require('async')
 var spawn = require('child_process').spawn
 var fs = require('fs');
 var moment = require('moment')
+var bunyan = require('bunyan')
+var AwPubSub = require('apiway-pubsub')
 var db = require('../utils/db')
 var Response = require('../utils/response');
 var RESP = require('../utils/response_values');
 var response = new Response();
 var Instance = require('../models/instance');
 var Project = require('../models/project');
+var User = require('../models/user');
 var tcRunnerConfig = require('../config/tc-runner-pod.json')
+var config = require('../config.json')
 var TC_RUNNER_PREFIX = 'tc-runner-'
+
+let log = bunyan.createLogger({name:'apiway-api', module: 'instance'})
 
 router.post('/', function(req, res){
   console.log('instance / :POST started')
@@ -54,6 +60,14 @@ router.put('/:instanceId', function(req, res){
         response.responseMessage = error;
         res.json(response)
     })
+});
+
+router.get('/test', function(req, res){
+  let data = "xxxxxx"
+  let awPubSub = new AwPubSub()
+  awPubSub.publish('apiway/smtp', data).then(() => {
+    log.info('sendNotification done')
+  })
 });
 
 router.get('/:instanceId', function(req, res){
@@ -121,19 +135,57 @@ function connectDB () {
 function updateInstance (instanceId, data) {
   return new Promise((resolve, reject) => {
 
-      Instance.findOneAndUpdate(
-      {"_id": instanceId
-      },
-      {$set: data
-      },
-      {upsert: true, new: true},
-      function(err, instance) {
+    Instance.findOneAndUpdate(
+    {"_id": instanceId
+    },
+    {$set: data
+    },
+    {upsert: true, new: true},
+    function(err, instance) {
+      if (err) {
+        console.error(err)
+        reject(err)
+      }
+      // console.log('updateInstance done: ' + instance._id)
+      resolve(instance)
+      if (data.status == "PASS" || data.status == "FAIL" || data.status == "BROKEN") {
+        sendNotification(instance)
+      }
+    })
+  })
+}
+
+function sendNotification (instance, data) {
+  getProjectByProjectId(instance.project.projectId)
+    .then((project) => getUserEmailByProject(project))
+    .then((project) => {
+      console.log('email = ' + JSON.stringify(project.subscriber))
+      let awPubSub = new AwPubSub()
+      let message = {
+        instance: instance,
+        subscriber: project.subscriber
+      }
+      console.log(message)
+      awPubSub.publish('apiway/smtp', JSON.stringify(message)).then(() => {
+        log.info('sendNotification done')
+      })
+    })
+}
+
+function getUserEmailByProject (project) {
+  return new Promise((resolve, reject) => {
+    console.log('getUserEmailByProject')
+    console.log(project)
+    User.findOne(
+      {"_id": project.owner},
+      function(err, user) {
         if (err) {
           console.error(err)
           reject(err)
         }
-        // console.log('updateInstance done: ' + instance._id)
-        resolve(instance)
+        console.log(user)
+        project.subscriber.push(user.email)
+        resolve(project)
       }
     )
   })
@@ -156,35 +208,35 @@ function getInstanceByInstanceId(data) {
 
 function getProject (data) {
   if (data.projectId) {
-    return getProjectByProjectId(data)
+    return getProjectByProjectId(data.projectId)
   } else if (data.full_name) {
-    return getProjectByProjectName(data)
+    return getProjectByProjectName(data.full_name)
   }
 }
 
-function getProjectByProjectId (data) {
-  // console.log('getProjectByProjectId:' + JSON.stringify(data))
+function getProjectByProjectId (projectId) {
+  log.info('getProjectByProjectId:' + JSON.stringify(projectId))
   return new Promise((resolve, reject) => {
       Project.findOne(
-      {"_id": data.projectId},
+      {"_id": projectId},
       function(err, project) {
         if (err) {
           console.error(err)
           reject(err)
         }
         // console.log('getProjectByProjectId')
-        // console.log(project)
+        console.log(project)
         resolve(project)
       }
     )
   })
 }
 
-function getProjectByProjectName (data) {
+function getProjectByProjectName (full_name) {
   // console.log('getProjectByProjectName:' + JSON.stringify(data))
   return new Promise((resolve, reject) => {
       Project.findOne(
-      {"full_name": data.full_name},
+      {"full_name": full_name},
       function(err, project) {
         if (err) {
           console.error(err)
@@ -232,7 +284,7 @@ function getInstancesByProjectId (data) {
 
 function createInstance(data) {
   return new Promise((resolve, reject) => {
-    // console.log('createInstance: ' + JSON.stringify(data))
+    log.info('createInstance: ' + JSON.stringify(data))
     var d = {
       project: {
         name: data.name,

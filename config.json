@@ -29,5 +29,10 @@
     "MONGODB_URL": "mongo-0.mongo,mongo-1.mongo,mongo-2.mongo:27017",
     "MONGODB_URL_DEV": "localhost:27017",
     "DB": "apiway"
+  },
+  "mqtt": {
+    "protocol": "mqtt",
+    "port": "1883",
+    "host": "apiway-pubsub"
   }
 }

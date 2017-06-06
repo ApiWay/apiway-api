@@ -5,11 +5,13 @@ var Response = require('../utils/response');
 var RESP = require('../utils/response_values');
 var response = new Response();
 var Project = require('../models/project');
+var User = require('../models/user');
 
 router.post('/', function(req, res){
   // console.log(req)
     connectDB()
-    .then( data => createProject(req.body, data))
+    .then( data => getUser(req.body, data))
+    .then( data => createProject(data))
     .then( (id) => {
       response.responseMessage = RESP.SUCCESS
       response.data = {
@@ -86,6 +88,23 @@ function getProjectByProjectId (data) {
     })
 }
 
+function getUser (data) {
+  return new Promise((resolve, reject) => {
+    User.findOne(
+      {"_id": data.owner},
+      function(err, user) {
+        if (err) {
+          console.error(err)
+          reject(err)
+        }
+        console.log(user)
+        data.email = user.email
+        resolve(data)
+      }
+    )
+  })
+}
+
 function getProjectsByUserId (data) {
   return new Promise((resolve, reject) => {
     console.log('.....' + JSON.stringify(data))
@@ -104,19 +123,15 @@ function getProjectsByUserId (data) {
 }
 
 function createProject (data) {
+  console.log('createProject')
+  console.log(data)
   return new Promise((resolve, reject) => {
     Project.findOneAndUpdate(
       {"full_name": data.full_name,
-        "provider": data.provider
+        "provider": data.provider,
+        "owner": data.owner
       },
-      {$set:{
-        'name': data.name,
-        'full_name': data.full_name,
-        'owner': data.owner,
-        'html_url': data.url,
-        'git_url': data.git_url,
-        'provider': data.provider
-        },
+      {$set:data
       },
       {upsert: true, new: true},
       function(err, project) {
