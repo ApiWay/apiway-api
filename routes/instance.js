@@ -149,20 +149,21 @@ function updateInstance (instanceId, data) {
       // console.log('updateInstance done: ' + instance._id)
       resolve(instance)
       if (data.status == "PASS" || data.status == "FAIL" || data.status == "BROKEN") {
-        sendNotification(instance.project.projectId)
+        sendNotification(instance)
       }
     })
   })
 }
 
-function sendNotification (projectId, data) {
-  getProjectByProjectId(projectId)
+function sendNotification (instance, data) {
+  getProjectByProjectId(instance.project.projectId)
     .then((project) => getUserEmailByProject(project))
     .then((project) => {
       console.log('email = ' + JSON.stringify(project.subscriber))
       let awPubSub = new AwPubSub()
       let message = {
-        project: project
+        instance: instance,
+        subscriber: project.subscriber
       }
       console.log(message)
       awPubSub.publish('apiway/smtp', JSON.stringify(message)).then(() => {
@@ -173,6 +174,8 @@ function sendNotification (projectId, data) {
 
 function getUserEmailByProject (project) {
   return new Promise((resolve, reject) => {
+    console.log('getUserEmailByProject')
+    console.log(project)
     User.findOne(
       {"_id": project.owner},
       function(err, user) {
