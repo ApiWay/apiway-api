@@ -33,6 +33,24 @@ router.post('/', function(req, res){
     })
 });
 
+router.put('/:projectId', function(req, res){
+  // console.log(req)
+  connectDB()
+    .then( data => updateProject(req.params.projectId, req.body))
+    .then( (project) => {
+      response.responseMessage = "Successfully updated"
+      response.data = project
+      log.info(response)
+      res.json(response)
+      startSchedule(project)
+    }).catch( function (error) {
+    console.error(error)
+    response.responseStatus = RESP.FAIL;
+    response.responseMessage = error;
+    res.json(response)
+  })
+});
+
 router.get('/:projectId', function(req, res){
   console.log(req.params.projectId)
   connectDB()
@@ -153,7 +171,7 @@ function getProjectsByUserId (data) {
         resolve(project)
       }
     )
-})
+  })
 }
 
 function createProject (data) {
@@ -178,6 +196,30 @@ function createProject (data) {
         resolve(project)
       }
     )
+  })
+}
+
+function updateProject (projectId, data) {
+  console.log('updateProject')
+  console.log(projectId)
+  return new Promise((resolve, reject) => {
+    Project.findOneAndUpdate(
+      {"_id": projectId
+      },
+      {$set: data
+      },
+      {upsert: true, new: true},
+      function(err, data) {
+        if (err) {
+          console.error(err)
+          reject(err)
+        }
+        // console.log('updateInstance done: ' + instance._id)
+        resolve(data)
+        // if (data.status == "PASS" || data.status == "FAIL" || data.status == "BROKEN") {
+        //   sendNotification(instance)
+        // }
+      })
   })
 }
 
