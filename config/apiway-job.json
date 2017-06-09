@@ -10,8 +10,8 @@
   "spec": {
     "restartPolicy": "Never",
     "containers": [{
-      "name": "tower-tc-runner",
-      "image": "539277938309.dkr.ecr.us-west-2.amazonaws.com/tower-tc-runner:latest",
+      "name": "apiway-job",
+      "image": "539277938309.dkr.ecr.us-west-2.amazonaws.com/apiway-job:latest",
       "env": [{
         "name": "instanceId",
         "value": ""
