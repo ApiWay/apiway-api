@@ -50,6 +50,22 @@ router.get('/:projectId', function(req, res){
   })
 });
 
+router.delete('/:projectId', function(req, res){
+  console.log(req.params.projectId)
+  connectDB()
+    .then( data => deleteProjectByProjectId(req.params.projectId, data))
+    .then( (data) => {
+      response.responseMessage = "Successfully deleted"
+      console.log(response)
+      res.json(response)
+    }).catch( function (error) {
+    console.error(error)
+    response.responseStatus = RESP.FAIL;
+    response.responseMessage = error;
+    res.json(response)
+  })
+});
+
 router.get('/users/:userId', function(req, res){
   console.log(req.params)
   connectDB()
@@ -92,6 +108,18 @@ function getProjectByProjectId (data) {
         }
       )
     })
+}
+
+function deleteProjectByProjectId (projectId) {
+  return new Promise((resolve, reject) => {
+    Project.findByIdAndRemove(projectId, function (err, res) {
+      if (err) {
+        console.error(err)
+        reject(err)
+      }
+      resolve()
+    });
+  })
 }
 
 function getUser (data) {
