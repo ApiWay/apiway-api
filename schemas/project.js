@@ -9,7 +9,8 @@ var projectSchema = new Schema({
     git_url: String,
     provider: String,
     projectId: String,
-    subscriber: [String]
+    subscriber: [String],
+    schedule: String
 });
 
 module.exports = projectSchema;

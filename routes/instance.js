@@ -13,9 +13,9 @@ var response = new Response();
 var Instance = require('../models/instance');
 var Project = require('../models/project');
 var User = require('../models/user');
-var tcRunnerConfig = require('../config/tc-runner-pod.json')
+var tcRunnerConfig = require('../config/apiway-job.json')
 var config = require('../config.json')
-var TC_RUNNER_PREFIX = 'tc-runner-'
+var TC_RUNNER_PREFIX = 'apiway-job-'
 
 let log = bunyan.createLogger({name:'apiway-api', module: 'instance'})
 

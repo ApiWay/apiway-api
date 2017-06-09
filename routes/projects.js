@@ -1,24 +1,30 @@
 var express = require('express')
 var router = express.Router();
+var AwPubSub = require('apiway-pubsub')
+var bunyan = require('bunyan')
 var db = require('../utils/db')
 var Response = require('../utils/response');
 var RESP = require('../utils/response_values');
 var response = new Response();
+var config = require('../config.json')
 var Project = require('../models/project');
 var User = require('../models/user');
+
+let log = bunyan.createLogger({name:'apiway-api', module: 'instance'})
 
 router.post('/', function(req, res){
   // console.log(req)
     connectDB()
     .then( data => getUser(req.body, data))
     .then( data => createProject(data))
-    .then( (id) => {
+    .then( (project) => {
       response.responseMessage = RESP.SUCCESS
       response.data = {
-        "projectId": id
+        "projectId": project._id
       }
-      console.log(response)
+      log.info(response)
       res.json(response)
+      startSchedule(project)
     }).catch( function (error) {
       console.error(error)
       response.responseStatus = RESP.FAIL;
@@ -125,6 +131,7 @@ function getProjectsByUserId (data) {
 function createProject (data) {
   console.log('createProject')
   console.log(data)
+  data.schedule = config.schedule.default
   return new Promise((resolve, reject) => {
     Project.findOneAndUpdate(
       {"full_name": data.full_name,
@@ -139,10 +146,18 @@ function createProject (data) {
           console.error(err)
           reject(err)
         }
-        console.log('createProject done: ' + project._id)
-        resolve(project._id)
+        log.info('createProject done: ' + project._id)
+        resolve(project)
       }
     )
+  })
+}
+
+function startSchedule (project) {
+  let awPubSub = new AwPubSub()
+  console.log(project)
+  awPubSub.publish('apiway/schedule', JSON.stringify(project)).then(() => {
+    log.info('startSchedule done')
   })
 }
 
