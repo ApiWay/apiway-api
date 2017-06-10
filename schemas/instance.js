@@ -15,6 +15,9 @@ var instanceSchema = new Schema({
     endTime: Number,
     locale: String,
     status: String,
+    commit: String,
+    commitUrl: String,
+    branch: String,
     logUrl: String,
     reportJson: String,
     reportHtml: String
