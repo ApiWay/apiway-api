@@ -294,6 +294,7 @@ function createInstance(data) {
       owner: data.owner,
       startTime: moment().unix(),
       locale: moment.locale(),
+      branch: data.default_branch,
       status: "RUNNING",
       logUrl: data.logUrl
     }
