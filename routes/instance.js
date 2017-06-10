@@ -32,10 +32,7 @@ router.post('/', function(req, res){
       // console.log(JSON.stringify(data))
       response.responseStatus = RESP.SUCCESS
       response.responseMessage = "OK"
-      response.data = {
-        "instanceId": data._id
-      }
-      // console.log(JSON.stringify(response))
+      response.data = data
       res.json(response)
     }).catch( function (error) {
       console.error(error)
