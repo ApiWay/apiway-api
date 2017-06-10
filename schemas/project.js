@@ -8,6 +8,7 @@ var projectSchema = new Schema({
     html_url: String,
     git_url: String,
     provider: String,
+    default_branch: String,
     projectId: String,
     subscriber: [String],
     schedule: String
