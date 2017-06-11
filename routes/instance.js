@@ -59,14 +59,6 @@ router.put('/:instanceId', function(req, res){
     })
 });
 
-router.get('/test', function(req, res){
-  let data = "xxxxxx"
-  let awPubSub = new AwPubSub()
-  awPubSub.publish('apiway/smtp', data).then(() => {
-    log.info('sendNotification done')
-  })
-});
-
 router.get('/:instanceId', function(req, res){
   // console.log(req.query)
   connectDB()
@@ -84,14 +76,11 @@ router.get('/:instanceId', function(req, res){
 });
 
 router.get('/users/:userId', function(req, res){
-  // console.log(req.query)
   connectDB()
-  .then( data => getInstancesByUserId(req.params, data))
+  .then( data => getInstancesByUserId(req.params, req.query, data))
   .then( (instances) => {
     response.responseMessage = RESP.SUCCESS
-    response.data = {
-      instances: instances
-    }
+    response.data = instances
     res.json(response)
   }).catch( function (error) {
     console.error(error)
@@ -102,14 +91,12 @@ router.get('/users/:userId', function(req, res){
 });
 
 router.get('/projects/:projectId', function(req, res){
-  // console.log(req.query)
+  console.log(req)
   connectDB()
-  .then( data => getInstancesByProjectId(req.params, data))
+  .then( data => getInstancesByProjectId(req.params, req.query, data))
   .then( (instances) => {
     response.responseMessage = RESP.SUCCESS
-    response.data = {
-      instances: instances
-    }
+    response.data = instances
   res.json(response)
   }).catch( function (error) {
       console.error(error)
@@ -247,35 +234,41 @@ function getProjectByProjectName (full_name) {
   })
 }
 
-function getInstancesByUserId (data) {
+function getInstancesByUserId (params, query) {
   return new Promise((resolve, reject) => {
-      Instance.find(
-      {"owner": data.userId},
-      function(err, instances) {
+    let limit = query.per_page ? query.per_page : 30
+    let skip = query.page ? query.page * per_page : 0
+    Instance.find({"owner": params.userId})
+      .limit(Number(limit))
+      .sort({startTime: -1})
+      .skip(Number(skip))
+      .exec(function(err, instances) {
         if (err) {
           console.error(err)
           reject(err)
         }
         // console.log(instances)
         resolve(instances)
-      }
-    )
+      })
   })
 }
 
-function getInstancesByProjectId (data) {
+function getInstancesByProjectId (params, query) {
   return new Promise((resolve, reject) => {
-      Instance.find(
-      {"project.projectId": data.projectId},
-      function(err, instances) {
+    let limit = query.per_page ? query.per_page : 30
+    let skip = query.page ? query.page * per_page : 0
+    Instance.find({"project.projectId": params.projectId})
+      .limit(Number(limit))
+      .sort({startTime: -1})
+      .skip(Number(skip))
+      .exec(function(err, instances) {
         if (err) {
           console.error(err)
           reject(err)
         }
         // console.log(instances)
         resolve(instances)
-      }
-    )
+      })
   })
 }
 
