@@ -8,6 +8,7 @@ var RESP = require('../utils/response_values');
 var response = new Response();
 var config = require('../config.json')
 var Project = require('../models/project');
+var Instance = require('../models/instance');
 var User = require('../models/user');
 
 let log = bunyan.createLogger({name:'apiway-api', module: 'instance'})
@@ -72,9 +73,10 @@ router.delete('/:projectId', function(req, res){
   console.log(req.params.projectId)
   connectDB()
     .then( data => deleteProjectByProjectId(req.params.projectId, data))
+    .then( data => deleteInstancesByProjectId(req.params.projectId, data))
     .then( (data) => {
-      response.responseMessage = "Successfully deleted"
-      console.log(response)
+      response.responseMessage = `${req.prrams.projectId} is successfully deleted`
+      // console.log(response)
       res.json(response)
     }).catch( function (error) {
     console.error(error)
@@ -131,6 +133,21 @@ function getProjectByProjectId (data) {
 function deleteProjectByProjectId (projectId) {
   return new Promise((resolve, reject) => {
     Project.findByIdAndRemove(projectId, function (err, res) {
+      if (err) {
+        console.error(err)
+        reject(err)
+      }
+      resolve()
+    });
+  })
+}
+
+function deleteInstancesByProjectId (projectId) {
+  return new Promise((resolve, reject) => {
+    Instance.remove(
+      {
+        "project.projectId": projectId
+      }, function (err, res) {
       if (err) {
         console.error(err)
         reject(err)
