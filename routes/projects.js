@@ -25,7 +25,7 @@ router.post('/', function(req, res){
       }
       log.info(response)
       res.json(response)
-      startSchedule(project)
+      createSchedule(project)
     }).catch( function (error) {
       console.error(error)
       response.responseStatus = RESP.FAIL;
@@ -43,7 +43,7 @@ router.put('/:projectId', function(req, res){
       response.data = project
       log.info(response)
       res.json(response)
-      startSchedule(project)
+      updateSchedule(project)
     }).catch( function (error) {
     console.error(error)
     response.responseStatus = RESP.FAIL;
@@ -240,11 +240,19 @@ function updateProject (projectId, data) {
   })
 }
 
-function startSchedule (project) {
+function createSchedule (project) {
   let awPubSub = new AwPubSub()
   console.log(project)
-  awPubSub.publish('apiway/schedule', JSON.stringify(project)).then(() => {
-    log.info('startSchedule done')
+  awPubSub.publish('apiway/schedule/create', JSON.stringify(project)).then(() => {
+    log.info('createSchedule done')
+  })
+}
+
+function updateSchedule (project) {
+  let awPubSub = new AwPubSub()
+  console.log(project)
+  awPubSub.publish('apiway/schedule/update', JSON.stringify(project)).then(() => {
+    log.info('updateSchedule done')
   })
 }
 
