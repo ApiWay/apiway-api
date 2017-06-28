@@ -11,7 +11,8 @@ var projectSchema = new Schema({
     default_branch: String,
     projectId: String,
     subscriber: [String],
-    schedule: String
+    schedule: String,
+    scheduleId: String
 });
 
 module.exports = projectSchema;
