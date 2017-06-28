@@ -4,7 +4,8 @@
   "metadata": {
     "name": "",
     "labels": {
-      "purpose": "TC-Running"
+      "purpose": "TC-Running",
+      "instanceId": ""
     }
   },
   "spec": {

@@ -326,6 +326,7 @@ function setupDocker(data) {
   return new Promise((resolve, reject) => {
     let id = data._id
     tcRunnerConfig.metadata.name = TC_RUNNER_PREFIX + id
+    tcRunnerConfig.metadata.labels.instanceId = id
     tcRunnerConfig.spec.containers[0].env[0].value = id
     let configFile = tcRunnerConfig.metadata.name + '.json'
     let configString = JSON.stringify(tcRunnerConfig)
