@@ -91,7 +91,7 @@ router.get('/users/:userId', function(req, res){
 });
 
 router.get('/projects/:projectId', function(req, res){
-  console.log(req)
+  //console.log(req)
   connectDB()
   .then( data => getInstancesByProjectId(req.params, req.query, data))
   .then( (instances) => {

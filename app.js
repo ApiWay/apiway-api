@@ -11,6 +11,8 @@ var index = require('./routes/index');
 var users = require('./routes/users');
 var projects = require('./routes/projects');
 var instances = require('./routes/instance');
+var schedules = require('./routes/schedules');
+var schedulers = require('./routes/schedulers');
 var timelines = require('./routes/timeline');
 
 var app = express();
@@ -31,6 +33,8 @@ app.use('/auth', oauth);
 app.use('/users', users);
 app.use('/projects', projects);
 app.use('/instances', instances);
+app.use('/schedules', schedules);
+app.use('/schedulers', schedulers);
 app.use('/timelines', timelines);
 
 // catch 404 and forward to error handler
