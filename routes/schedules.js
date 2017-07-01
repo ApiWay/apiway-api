@@ -62,6 +62,7 @@ router.get('/', function(req, res){
       response.data = {
         "schedules" : schedules
       }
+      // console.log(schedules)
       res.json(response)
     }).catch( function (error) {
     console.error(error)
@@ -72,14 +73,15 @@ router.get('/', function(req, res){
 });
 
 router.get('/:scheduleId', function(req, res){
-  console.log(req.params.scheduleId)
+  // console.log(req.params.scheduleId)
+  var response = new Response();
   connectDB()
   .then( data => schedule.getScheduleByScheduleId(req.params, data))
   .then( (schedule) => {
     response.responseStatus = RESP.SUCCESS;
     response.responseMessage = "Successfully retrieved"
     response.data = schedule
-    console.log(response)
+    // console.log(response)
     res.json(response)
   }).catch( function (error) {
     console.error(error)
@@ -90,7 +92,8 @@ router.get('/:scheduleId', function(req, res){
 });
 
 router.get('/users/:userId', function(req, res){
-  console.log(req.params.userId)
+  var response = new Response();
+  // console.log(req.params.userId)
   connectDB()
     .then( data => schedule.getSchedulesByUserId(req.params, data))
     .then( (schedules) => {
@@ -109,7 +112,8 @@ router.get('/users/:userId', function(req, res){
 });
 
 router.get('/projects/:projectId', function(req, res){
-  console.log(req.params.projectId)
+  var response = new Response();
+  // console.log(req.params.projectId)
   connectDB()
     .then( data => schedule.getSchedulesByProjectId(req.params, data))
     .then( (schedules) => {
@@ -128,7 +132,7 @@ router.get('/projects/:projectId', function(req, res){
 });
 
 router.delete('/:scheduleId', function(req, res){
-  console.log(req.params.scheduleId)
+  // console.log(req.params.scheduleId)
   var response = new Response();
   connectDB()
     .then( data => schedule.deleteScheduleByScheduleId(req.params.scheduleId, data))
@@ -146,7 +150,7 @@ router.delete('/:scheduleId', function(req, res){
 });
 
 router.delete('/projects/:projectId', function(req, res){
-  console.log(req.params.projectId)
+  // console.log(req.params.projectId)
   var response = new Response();
   connectDB()
     .then( data => schedule.deleteSchedulesByProjectId(req.params.projectId, data))
@@ -164,7 +168,7 @@ router.delete('/projects/:projectId', function(req, res){
 });
 
 router.delete('/users/:userId', function(req, res){
-  console.log(req.params.userId)
+  // console.log(req.params.userId)
   var response = new Response();
   connectDB()
     .then( data => schedule.deleteSchedulesByUserId(req.params.userId, data))

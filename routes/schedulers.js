@@ -46,6 +46,25 @@ router.put('/:schedulerId', function(req, res){
   })
 });
 
+router.put('/:schedulerId/addSchedules', function(req, res){
+  // console.log(req)
+  var response = new Response();
+  connectDB()
+    .then( data => scheduler.addSchedulees(req.params.schedulerId, req.body))
+    .then( (scheduler) => {
+      response.responseStatus = RESP.SUCCESS;
+      response.responseMessage = "Successfully added"
+      response.data = scheduler
+      log.info(response)
+      res.json(response)
+    }).catch( function (error) {
+    console.error(error)
+    response.responseStatus = RESP.FAIL;
+    response.responseMessage = error;
+    res.json(response)
+  })
+});
+
 router.get('/', function(req, res){
   var response = new Response();
   connectDB()
