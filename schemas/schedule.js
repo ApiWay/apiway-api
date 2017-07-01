@@ -5,7 +5,7 @@ var scheduleSchema = new Schema({
   projectId: String,
   owner: String,
   data: String,
-  state: String,
+  state: { type: String, default: "inactive" },
   cron: String,
   schedulerId: String
 });
