@@ -36,6 +36,6 @@
     "host": "apiway-pubsub"
   },
   "schedule": {
-    "default": "*/2 * * * *"
+    "default": "* */1 * * *"
   }
 }

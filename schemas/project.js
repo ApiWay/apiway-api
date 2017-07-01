@@ -11,7 +11,6 @@ var projectSchema = new Schema({
     default_branch: String,
     projectId: String,
     subscriber: [String],
-    schedule: String,
     scheduleId: String
 });
 

@@ -10,6 +10,7 @@ var config = require('../config.json')
 var Project = require('../models/project');
 var Instance = require('../models/instance');
 var User = require('../models/user');
+var schedule = require('../lib/schedule')
 
 let log = bunyan.createLogger({name:'apiway-api', module: 'instance'})
 
@@ -20,12 +21,10 @@ router.post('/', function(req, res){
     .then( data => createProject(data))
     .then( (project) => {
       response.responseMessage = RESP.SUCCESS
-      response.data = {
-        "projectId": project._id
-      }
+      response.data = project
       log.info(response)
       res.json(response)
-      createSchedule(project)
+      schedule.createSchedule(project)
     }).catch( function (error) {
       console.error(error)
       response.responseStatus = RESP.FAIL;
@@ -43,7 +42,7 @@ router.put('/:projectId', function(req, res){
       response.data = project
       log.info(response)
       res.json(response)
-      updateSchedule(project)
+      // updateSchedule(project)
     }).catch( function (error) {
     console.error(error)
     response.responseStatus = RESP.FAIL;
@@ -78,6 +77,7 @@ router.delete('/:projectId', function(req, res){
       response.responseMessage = `${req.prrams.projectId} is successfully deleted`
       // console.log(response)
       res.json(response)
+      schedule.deleteSchedulesByProjectId(req.params.projectId)
     }).catch( function (error) {
     console.error(error)
     response.responseStatus = RESP.FAIL;
@@ -179,13 +179,13 @@ function getProjectsByUserId (data) {
     console.log('.....' + JSON.stringify(data))
       Project.find(
       {"owner": data.userId},
-      function(err, project) {
+      function(err, projects) {
         if (err) {
           console.error(err)
           reject(err)
         }
-        console.log(project)
-        resolve(project)
+        console.log(projects)
+        resolve(projects)
       }
     )
   })
@@ -240,21 +240,21 @@ function updateProject (projectId, data) {
   })
 }
 
-function createSchedule (project) {
-  let awPubSub = new AwPubSub()
-  console.log(project)
-  awPubSub.publish('apiway/schedule/create', JSON.stringify(project)).then(() => {
-    log.info('createSchedule done')
-  })
-}
-
-function updateSchedule (project) {
-  let awPubSub = new AwPubSub()
-  console.log(project)
-  awPubSub.publish('apiway/schedule/update', JSON.stringify(project)).then(() => {
-    log.info('updateSchedule done')
-  })
-}
+// function createSchedule (project) {
+//   let awPubSub = new AwPubSub()
+//   console.log(project)
+//   awPubSub.publish('apiway/schedule/create', JSON.stringify(project)).then(() => {
+//     log.info('createSchedule done')
+//   })
+// }
+//
+// function updateSchedule (project) {
+//   let awPubSub = new AwPubSub()
+//   console.log(project)
+//   awPubSub.publish('apiway/schedule/update', JSON.stringify(project)).then(() => {
+//     log.info('updateSchedule done')
+//   })
+// }
 
 
 module.exports = router;
