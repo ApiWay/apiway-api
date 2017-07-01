@@ -6,7 +6,7 @@ var scheduleSchema = new Schema({
   owner: String,
   data: String,
   state: { type: String, default: "inactive" },
-  cron: String,
+  cron: { type: String, default: "* */1 * * *" },
   schedulerId: String
 });
 
