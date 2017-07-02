@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "apiway-pubsub": "latest",
+    "apiway.js": "0.0.33",
     "async": "2.3.0",
     "axios": "^0.15.3",
     "body-parser": "~1.17.1",
