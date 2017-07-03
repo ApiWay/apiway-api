@@ -25,6 +25,9 @@ router.post('/', function(req, res){
       response.data = schedule
       log.info(response)
       res.json(response)
+
+      //Publish a message to nofity a new schedule is created
+      pubCreateSchedule(schedule)
     }).catch( function (error) {
       console.error(error)
       response.responseStatus = RESP.FAIL;
@@ -193,6 +196,12 @@ function connectDB () {
       reject(error)
     })
   })
+}
+
+function pubCreateSchedule (schedule) {
+  let awPubSub = new AwPubSub()
+  console.log(schedule)
+  awPubSub.publish('apiway/schedule/create', JSON.stringify(schedule))
 }
 
 // function createSchedule (project) {
