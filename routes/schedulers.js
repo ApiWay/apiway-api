@@ -159,11 +159,28 @@ router.delete('/:schedulerId', function(req, res){
   })
 });
 
-router.delete('/:schedulerId/:scheduleId', function(req, res){
+// router.delete('/:schedulerId/:scheduleId', function(req, res){
+//   console.log(req.params.scheduleId)
+//   var response = new Response();
+//   connectDB()
+//     .then( data => scheduler.deleteSchedule(req.params, data))
+//     .then( (data) => {
+//       response.responseStatus = RESP.SUCCESS;
+//       response.responseMessage = `${req.params.scheduleId} is successfully deleted`
+//       res.json(response)
+//     }).catch( function (error) {
+//     console.error(error)
+//     response.responseStatus = RESP.FAIL;
+//     response.responseMessage = error;
+//     res.json(response)
+//   })
+// });
+
+router.delete('/:scheduleId', function(req, res){
   console.log(req.params.scheduleId)
   var response = new Response();
   connectDB()
-    .then( data => scheduler.deleteSchedule(req.params, data))
+    .then( data => scheduler.deleteSchedule(req.params.scheduleId, data))
     .then( (data) => {
       response.responseStatus = RESP.SUCCESS;
       response.responseMessage = `${req.params.scheduleId} is successfully deleted`
