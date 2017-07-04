@@ -118,7 +118,7 @@ router.get('/projects/:projectId', function(req, res){
   var response = new Response();
   // console.log(req.params.projectId)
   connectDB()
-    .then( data => schedule.getSchedulesByProjectId(req.params, data))
+    .then( data => schedule.getSchedulesByProjectId(req.params.projectId, data))
     .then( (schedules) => {
       response.responseStatus = RESP.SUCCESS;
       response.responseMessage = "Successfully retrieved"
