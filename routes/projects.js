@@ -1,6 +1,5 @@
 var express = require('express')
 var router = express.Router();
-var AwPubSub = require('apiway-pubsub')
 var bunyan = require('bunyan')
 var db = require('../utils/db')
 var Response = require('../utils/response');
@@ -71,13 +70,15 @@ router.get('/:projectId', function(req, res){
 router.delete('/:projectId', function(req, res){
   console.log(req.params.projectId)
   connectDB()
-    .then( data => deleteProjectByProjectId(req.params.projectId, data))
+    .then( data => schedule.getSchedulesByProjectId(req.params.projectId, data))
+    .then( schedules => schedule.deleteSchedulesInSchedulers(schedules))
+    .then( data => schedule.deleteSchedulesByProjectId(req.params.projectId, data))
     .then( data => deleteInstancesByProjectId(req.params.projectId, data))
+    .then( data => deleteProjectByProjectId(req.params.projectId, data))
     .then( (data) => {
-      response.responseMessage = `${req.prrams.projectId} is successfully deleted`
+      response.responseMessage = `${req.params.projectId} is successfully deleted`
       // console.log(response)
       res.json(response)
-      schedule.deleteSchedulesByProjectId(req.params.projectId)
     }).catch( function (error) {
     console.error(error)
     response.responseStatus = RESP.FAIL;

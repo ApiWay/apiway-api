@@ -10,6 +10,7 @@ var Project = require('../models/project');
 var Schedule = require('../models/schedule');
 var User = require('../models/user');
 var schedule = require('../lib/schedule')
+var scheduler = require('../lib/scheduler')
 
 let log = bunyan.createLogger({name:'apiway-api', module: 'router:schedule'})
 
@@ -27,7 +28,6 @@ router.post('/', function(req, res){
       res.json(response)
 
       //Publish a message to nofity a new schedule is created
-      pubCreateSchedule(schedule)
     }).catch( function (error) {
       console.error(error)
       response.responseStatus = RESP.FAIL;
@@ -139,6 +139,7 @@ router.delete('/:scheduleId', function(req, res){
   var response = new Response();
   connectDB()
     .then( data => schedule.deleteScheduleByScheduleId(req.params.scheduleId, data))
+    .then( data => scheduler.deleteSchedule(req.params.scheduleId, data))
     .then( (data) => {
       response.responseStatus = RESP.SUCCESS;
       response.responseMessage = `${req.params.scheduleId} is successfully deleted`
@@ -198,11 +199,6 @@ function connectDB () {
   })
 }
 
-function pubCreateSchedule (schedule) {
-  let awPubSub = new AwPubSub()
-  console.log(schedule)
-  awPubSub.publish('apiway/schedule/create', JSON.stringify(schedule))
-}
 
 // function createSchedule (project) {
 //   let awPubSub = new AwPubSub()
