@@ -10,6 +10,7 @@ var Project = require('../models/project');
 var Instance = require('../models/instance');
 var User = require('../models/user');
 var schedule = require('../lib/schedule')
+var awProject = require('../lib/project')
 
 let log = bunyan.createLogger({name:'apiway-api', module: 'instance'})
 
@@ -32,10 +33,29 @@ router.post('/', function(req, res){
     })
 });
 
+router.post('/:projectId/subscribe/email', function(req, res){
+  // console.log(req)
+  connectDB()
+    .then( data => awProject.addEmailSubcriber(req.params.projectId, req.body.email))
+    .then( (project) => {
+      response.responseMessage = "Successfully updated"
+      response.data = project
+      log.info(response)
+      res.json(response)
+      // updateSchedule(project)
+    }).catch( function (error) {
+    console.error(error)
+    response.responseStatus = RESP.FAIL;
+    response.responseMessage = error;
+    res.json(response)
+  })
+});
+
+
 router.put('/:projectId', function(req, res){
   // console.log(req)
   connectDB()
-    .then( data => updateProject(req.params.projectId, req.body))
+    .then( data => awProject.updateProject(req.params.projectId, req.body))
     .then( (project) => {
       response.responseMessage = "Successfully updated"
       response.data = project
@@ -217,29 +237,6 @@ function createProject (data) {
   })
 }
 
-function updateProject (projectId, data) {
-  console.log('updateProject')
-  console.log(projectId)
-  return new Promise((resolve, reject) => {
-    Project.findOneAndUpdate(
-      {"_id": projectId
-      },
-      {$set: data
-      },
-      {upsert: true, new: true},
-      function(err, data) {
-        if (err) {
-          console.error(err)
-          reject(err)
-        }
-        // console.log('updateInstance done: ' + instance._id)
-        resolve(data)
-        // if (data.status == "PASS" || data.status == "FAIL" || data.status == "BROKEN") {
-        //   sendNotification(instance)
-        // }
-      })
-  })
-}
 
 // function createSchedule (project) {
 //   let awPubSub = new AwPubSub()
