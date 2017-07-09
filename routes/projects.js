@@ -38,8 +38,28 @@ router.post('/:projectId/subscribe/email', function(req, res){
   connectDB()
     .then( data => awProject.addEmailSubcriber(req.params.projectId, req.body.email))
     .then( (project) => {
-      response.responseMessage = "Successfully updated"
+      response.responseStatus = RESP.SUCCESS
+      response.responseMessage = "Successfully added"
       response.data = project
+      log.info(response)
+      res.json(response)
+      // updateSchedule(project)
+    }).catch( function (error) {
+    console.error(error)
+    response.responseStatus = RESP.FAIL;
+    response.responseMessage = error;
+    res.json(response)
+  })
+});
+
+router.delete('/:projectId/subscribe/email', function(req, res){
+  // console.log(req)
+  connectDB()
+    .then( data => awProject.deleteEmailSubcriber(req.params.projectId, req.query.email))
+    .then( (data) => {
+      response.responseStatus = data.status
+      response.responseMessage = data.msg
+      response.data = null
       log.info(response)
       res.json(response)
       // updateSchedule(project)
@@ -180,6 +200,7 @@ function deleteInstancesByProjectId (projectId) {
 
 function getUser (data) {
   return new Promise((resolve, reject) => {
+    console.log(data)
     User.findOne(
       {"_id": data.owner},
       function(err, user) {
@@ -187,6 +208,7 @@ function getUser (data) {
           console.error(err)
           reject(err)
         }
+        console.log('getUser')
         console.log(user)
         data.email = user.email
         resolve(data)
