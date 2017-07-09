@@ -55,6 +55,44 @@ router.put('/:scheduleId', function(req, res){
   })
 });
 
+router.put('/:scheduleId/stop', function(req, res){
+  // console.log(req)
+  var response = new Response();
+  connectDB()
+    .then( data => schedule.updateSchedule(req.params.scheduleId, req.body))
+    .then( (schedule) => {
+      response.responseStatus = RESP.SUCCESS;
+      response.responseMessage = "Successfully stopped"
+      response.data = schedule
+      log.info(response)
+      res.json(response)
+    }).catch( function (error) {
+    console.error(error)
+    response.responseStatus = RESP.FAIL;
+    response.responseMessage = error;
+    res.json(response)
+  })
+});
+
+router.put('/:scheduleId/start', function(req, res){
+  // console.log(req)
+  var response = new Response();
+  connectDB()
+    .then( data => schedule.updateSchedule(req.params.scheduleId, req.body))
+    .then( (schedule) => {
+      response.responseStatus = RESP.SUCCESS;
+      response.responseMessage = "Successfully started"
+      response.data = schedule
+      log.info(response)
+      res.json(response)
+    }).catch( function (error) {
+    console.error(error)
+    response.responseStatus = RESP.FAIL;
+    response.responseMessage = error;
+    res.json(response)
+  })
+});
+
 router.get('/', function(req, res){
   var response = new Response();
   connectDB()
