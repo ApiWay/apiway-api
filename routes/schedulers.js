@@ -50,7 +50,7 @@ router.put('/:schedulerId/addSchedules', function(req, res){
   // console.log(req)
   var response = new Response();
   connectDB()
-    .then( data => scheduler.addSchedulees(req.params.schedulerId, req.body))
+    .then( data => scheduler.addSchedules(req.params.schedulerId, req.body))
     .then( (scheduler) => {
       response.responseStatus = RESP.SUCCESS;
       response.responseMessage = "Successfully added"
