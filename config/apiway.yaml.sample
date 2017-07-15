@@ -1,0 +1,33 @@
+version: 1
+
+# Add some environment variables
+env:
+  SAMPLE_ENV: sample
+  SAMPLE_ENV2: xxxx/yyyy
+
+checkout:
+  # Default branch is 'master'
+  branch: master
+
+build:
+  - checkout:
+      branch: master
+  - run:
+      name: update-npm
+      command: 'sudo npm install -g npm@latest'
+  - run:
+      name: install-npm-wee
+      command: npm install
+
+test:
+  - run:
+      name: test
+      command: npm test
+
+schedule:
+  every: 1h
+
+report:
+  subscribers:
+    - master@bluehack.net
+    - swcbok@gmail.com
