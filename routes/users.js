@@ -75,7 +75,7 @@ function createUser (data) {
       {$set:{
         'login': data.login,
         'avatarUrl': data.avatarUrl,
-        'email': data.email,
+        'email': data.email ? data.email : null,
         'oauthProvider': data.oauthProvider
         },
       },

@@ -210,7 +210,7 @@ function getUser (data) {
         }
         console.log('getUser')
         console.log(user)
-        data.email = user.email
+        data.email = user.email ? user.email : null
         resolve(data)
       }
     )
